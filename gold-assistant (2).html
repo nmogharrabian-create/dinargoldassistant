@@ -1,0 +1,607 @@
+<!DOCTYPE html>    
+<html lang="fa" dir="rtl">    
+<head>    
+<meta charset="UTF-8">    
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">    
+<meta name="apple-mobile-web-app-capable" content="yes">    
+<script src="https://telegram.org/js/telegram-web-app.js"></script>    
+<title>دستیار طلا</title>    
+<style>    
+*{box-sizing:border-box;margin:0;padding:0}    
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:#0F0F0F;color:#F0E6C8;min-height:100vh;display:flex;flex-direction:column;font-size:18px}    
+input,select,textarea,button{font-family:inherit;font-size:18px !important}    
+:root{--gold:#C9A84C;--gold-light:#F0D080;--gold-dark:#8B6914;--bg:#0F0F0F;--surface:#1A1A1A;--surface2:#242424;--surface3:#2D2D2D;--text:#F0E6C8;--text-dim:#8A7A5A;--green:#4CAF7A;--red:#E05555;--blue:#5B9BD5;--radius:16px}    
+.screen-center{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:18px}    
+.screen-logo{font-size:60px}    
+.screen-title{font-size:28px;font-weight:700;color:var(--gold)}    
+.screen-sub{font-size:18px;color:var(--text-dim)}    
+.big-input{width:100%;max-width:380px;background:var(--surface2);border:1px solid #333;border-radius:12px;padding:16px 20px;font-size:20px;color:var(--text);outline:none;text-align:center}    
+.big-input:focus{border-color:var(--gold)}    
+.big-btn{width:100%;max-width:380px;background:var(--gold);color:#000;border:none;border-radius:12px;padding:18px;font-size:20px;font-weight:700;cursor:pointer}    
+.big-btn.secondary{background:var(--surface2);color:var(--text);border:1px solid #333}    
+.big-btn.reset{background:#5B9BD5;color:#fff}    
+.big-btn.danger{background:#E05555;color:#fff}    
+.err-text{color:var(--red);font-size:16px}    
+.user-list{width:100%;max-width:380px;display:flex;flex-direction:column;gap:12px}    
+.user-pill{background:var(--surface2);border:1px solid #333;border-radius:12px;padding:18px;text-align:center;font-size:20px;font-weight:600;cursor:pointer;color:var(--text)}    
+.user-pill:active{background:var(--surface3)}    
+.hidden{display:none!important}    
+.header{background:var(--surface);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2A2A2A;position:sticky;top:0;z-index:100}    
+.header-title{font-size:22px;font-weight:700;color:var(--gold)}    
+.header-sub{font-size:14px;color:var(--text-dim);margin-top:2px}    
+.header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}    
+.icon-btn{width:48px;height:48px;border-radius:12px;background:var(--surface2);border:1px solid #2A2A2A;color:var(--text);font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer}    
+.icon-btn:hover{background:var(--surface3)}    
+.icon-btn.large{width:auto;padding:0 16px;gap:6px;font-size:16px}    
+.main-tabs{display:flex;background:var(--surface2);border-radius:12px;padding:4px;margin:12px 16px 0;gap:4px}    
+.main-tab{flex:1;text-align:center;padding:14px 4px;font-size:16px;border-radius:10px;cursor:pointer;color:var(--text-dim);transition:all .2s}    
+.main-tab.active{background:var(--gold-dark);color:var(--gold-light);font-weight:700}    
+.section-panel{display:none;flex:1;flex-direction:column;overflow:hidden}    
+.section-panel.active{display:flex}    
+.sub-tabs{display:flex;gap:8px;padding:12px 16px 0;flex-wrap:wrap}    
+.sub-tab{padding:10px 16px;font-size:15px;border-radius:10px;background:var(--surface2);color:var(--text-dim);border:1px solid #2A2A2A;cursor:pointer}    
+.sub-tab.active{background:var(--gold-dark);color:var(--gold-light);border-color:var(--gold-dark)}    
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px 16px}    
+.stat-card{background:var(--surface);border:1px solid #2A2A2A;border-radius:14px;padding:14px 12px;text-align:center}    
+.stat-label{font-size:14px;color:var(--text-dim);margin-bottom:6px}    
+.stat-value{font-size:20px;font-weight:700;color:var(--gold)}    
+.stat-value.pos{color:var(--green)}    
+.stat-value.neg{color:var(--red)}    
+.records-scroll{flex:1;overflow-y:auto;padding:10px 16px 16px;display:flex;flex-direction:column;gap:10px;max-height:50vh}    
+.empty-note{text-align:center;color:var(--text-dim);font-size:16px;margin-top:40px}    
+.record-item{background:var(--surface2);border-radius:14px;padding:14px 16px;border:1px solid #2A2A2A;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}    
+.record-info{flex:1}    
+.record-name{font-size:18px;font-weight:600}    
+.record-detail{font-size:15px;color:var(--text-dim);margin-top:4px;line-height:1.6}    
+.record-amount{text-align:left;font-size:16px;font-weight:700;white-space:nowrap}    
+.record-amount.sell,.record-amount.pos{color:var(--green)}    
+.record-amount.buy,.record-amount.neg{color:var(--red)}    
+.badge{display:inline-block;font-size:12px;padding:3px 8px;border-radius:8px;background:var(--surface3);color:var(--text-dim);margin-right:4px}    
+.badge.colleague{background:#3A2F5C;color:#B8A6E8}    
+.badge.walkin{background:#2F4A3A;color:#8FCBA8}    
+.del-x{color:var(--text-dim);font-size:18px;cursor:pointer;padding:4px 8px}    
+.del-x:hover{color:var(--red)}    
+.input-area{background:var(--surface);padding:12px 16px;border-top:1px solid #2A2A2A;display:flex;flex-direction:column;gap:10px}    
+.transcript-box{background:var(--surface2);border-radius:14px;padding:12px 16px;font-size:16px;color:var(--text-dim);min-height:44px;display:flex;align-items:center;border:1px solid #2A2A2A}    
+.transcript-box.listening{border-color:var(--gold);color:var(--text)}    
+.input-row{display:flex;gap:10px;align-items:center}    
+.text-input{flex:1;background:var(--surface2);border:1px solid #333;border-radius:14px;padding:14px 18px;font-size:18px;color:var(--text);outline:none}    
+.text-input:focus{border-color:var(--gold)}    
+.mic-btn,.manual-btn,.send-btn{border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}    
+.mic-btn{width:56px;height:56px;background:var(--gold);color:#000;font-size:24px}    
+.mic-btn.listening{background:var(--red);animation:pulse 1s infinite}    
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(224,85,85,.4)}50%{box-shadow:0 0 0 16px rgba(224,85,85,0)}}    
+.send-btn{width:52px;height:52px;background:var(--gold-dark);color:var(--gold-light);font-size:20px}    
+.manual-btn{width:52px;height:52px;background:var(--surface2);border:1px solid #333;color:var(--text);font-size:20px}    
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:flex-end;justify-content:center;z-index:999}    
+.modal-box{background:var(--surface);width:100%;max-width:520px;max-height:92vh;overflow-y:auto;border-radius:24px 24px 0 0;padding:22px 20px 32px;border-top:2px solid var(--gold-dark)}    
+.modal-title{font-size:20px;font-weight:700;color:var(--gold);margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}    
+.field{margin-bottom:14px}    
+.field label{display:block;font-size:14px;color:var(--text-dim);margin-bottom:6px}    
+.field input,.field select,.field textarea{width:100%;background:var(--surface2);border:1px solid #333;border-radius:12px;padding:14px 16px;font-size:18px;color:var(--text);outline:none;font-family:inherit}    
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold)}    
+.field textarea{resize:vertical;min-height:60px}    
+.field-row{display:flex;gap:12px}    
+.field-row .field{flex:1}    
+.radio-row{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}    
+.radio-opt{flex:1;text-align:center;padding:14px 8px;border-radius:12px;background:var(--surface2);border:1px solid #333;font-size:16px;cursor:pointer;color:var(--text-dim);min-width:80px}    
+.radio-opt.sel{background:var(--gold-dark);color:var(--gold-light);border-color:var(--gold-dark)}    
+.modal-save-btn{width:100%;background:var(--gold);color:#000;border:none;border-radius:14px;padding:16px;font-size:18px;font-weight:700;cursor:pointer;margin-top:6px}    
+.modal-save-btn:hover{opacity:.9}    
+.modal-close{background:none;border:none;color:var(--text-dim);font-size:24px;cursor:pointer}    
+.link-btn{color:var(--gold);font-size:15px;cursor:pointer;text-align:center;margin-top:8px}    
+.link-btn:hover{text-decoration:underline}    
+.summary-scroll{flex:1;overflow-y:auto;padding:16px}    
+.big-card{background:var(--surface);border:1px solid #2A2A2A;border-radius:18px;padding:20px;margin-bottom:14px}    
+.big-card-title{font-size:15px;color:var(--text-dim);margin-bottom:12px}    
+.big-card-value{font-size:30px;font-weight:700;color:var(--gold)}    
+.big-card-value.pos{color:var(--green)}    
+.big-card-value.neg{color:var(--red)}    
+.sub-line{font-size:14px;color:var(--text-dim);margin-top:8px}    
+.breakdown-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #2A2A2A;font-size:16px}    
+.breakdown-row:last-child{border-bottom:none}    
+.entity-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #2A2A2A}    
+.entity-row:last-child{border-bottom:none}    
+.entity-name{font-size:16px;font-weight:600}    
+.status-bar{display:flex;justify-content:space-between;padding:6px 16px;background:var(--surface);border-top:1px solid #2A2A2A;font-size:13px;color:var(--text-dim)}    
+.gold-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:6px 0}    
+.gold-item{background:var(--surface2);border-radius:12px;padding:14px;text-align:center}    
+.gold-item .label{font-size:13px;color:var(--text-dim)}    
+.gold-item .value{font-size:22px;font-weight:700;color:var(--gold)}    
+.debt-card{background:var(--surface2);border-radius:14px;padding:14px;margin-bottom:12px;border-right:4px solid var(--red)}    
+.debt-card.settled{border-right-color:var(--green)}    
+.debt-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}    
+.debt-name{font-weight:700;font-size:17px}    
+.debt-amount{font-weight:700;font-size:17px}    
+.debt-amount.debt{color:var(--red)}    
+.debt-amount.credit{color:var(--green)}    
+.debt-detail{font-size:14px;color:var(--text-dim)}    
+.debt-detail div{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1A1A1A}    
+@media(max-width:480px){.stat-row{grid-template-columns:repeat(2,1fr)}.header-title{font-size:18px}.icon-btn{width:44px;height:44px;font-size:18px}.records-scroll{max-height:40vh}.gold-grid{grid-template-columns:1fr}}    
+</style>    
+</head>    
+<body>    
+    
+<!-- ===== USER SELECT SCREEN (بدون رمز) ===== -->    
+<div class="screen-center" id="userScreen">    
+<div class="screen-logo">👤</div>    
+<div class="screen-title">دستیار طلا</div>    
+<div class="screen-sub">شما کی هستید؟</div>    
+<div class="user-list" id="userList"></div>    
+<input type="text" class="big-input" id="newUserName" placeholder="نام کاربر جدید...">    
+<button class="big-btn secondary" onclick="addNewUser()">+ افزودن کاربر</button>    
+<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px;max-width:380px;width:100%">    
+<button class="big-btn reset" style="flex:1;" onclick="openBackupModal()">📂 بازیابی پشتیبان</button>    
+</div>    
+</div>    
+    
+<!-- ===== MAIN APP ===== -->    
+<div id="app" class="hidden" style="display:flex;flex-direction:column;min-height:100vh">    
+<div class="header">    
+<div><div class="header-title">🪙 دستیار طلا</div><div class="header-sub" id="currentUserLabel">—</div></div>    
+<div class="header-right">    
+<div class="icon-btn large" onclick="saveDailyData()" title="ذخیره روزانه">💾 ذخیره روز</div>    
+<div class="icon-btn" onclick="exportToExcel()" title="خروجی اکسل">📊</div>    
+<div class="icon-btn" onclick="shareBackupFile()" title="اشتراک‌گذاری/ایمیل">📤</div>    
+<div class="icon-btn" onclick="openSettings()" title="تنظیمات">⚙️</div>    
+<div class="icon-btn" onclick="logout()" title="خروج">🚪</div>    
+</div>    
+</div>    
+    
+<div class="main-tabs">    
+<div class="main-tab active" data-sec="vitrine" onclick="switchSection('vitrine')">ویترین</div>    
+<div class="main-tab" data-sec="abshodeh" onclick="switchSection('abshodeh')">آبشده</div>    
+<div class="main-tab" data-sec="workshop" onclick="switchSection('workshop')">کارگاه</div>    
+<div class="main-tab" data-sec="summary" onclick="switchSection('summary')">خلاصه‌کل</div>    
+</div>    
+    
+<!-- VITRINE -->    
+<div class="section-panel active" id="panel-vitrine">    
+<div class="sub-tabs">    
+<div class="sub-tab active" data-sub="ojrat" onclick="switchVitrineSub('ojrat')">اجرتی</div>    
+<div class="sub-tab" data-sub="price" onclick="switchVitrineSub('price')">تابلو (آب)</div>    
+</div>    
+<div class="stat-row" id="vitrineStats"></div>    
+<div class="records-scroll" id="vitrineRecords"></div>    
+<div class="input-area">    
+<div class="transcript-box" id="vitrineTranscript">برای ثبت سریع بنویسید...</div>    
+<div class="input-row">    
+<input type="text" class="text-input" id="vitrineTextInput" placeholder="مثلا: گردنبند ۵ گرم">    
+<button class="send-btn" onclick="sendText('vitrine')">➤</button>    
+<button class="manual-btn" onclick="openVitrineManual()">📝</button>    
+<button class="mic-btn" id="mic-vitrine" onclick="toggleVoiceInput('vitrine')">🎤</button>    
+</div>    
+</div>    
+</div>    
+    
+<!-- ABSHODEH -->    
+<div class="section-panel" id="panel-abshodeh">    
+<div class="stat-row" id="abshodehStats"></div>    
+<div class="records-scroll" id="abshodehRecords"></div>    
+<div class="input-area">    
+<div class="transcript-box" id="abshodehTranscript">برای ثبت سریع بنویسید...</div>    
+<div class="input-row">    
+<input type="text" class="text-input" id="abshodehTextInput" placeholder="مثلا: خرید ۱۰ گرم آبشده">    
+<button class="send-btn" onclick="sendText('abshodeh')">➤</button>    
+<button class="manual-btn" onclick="openAbshodehManual()">📝</button>    
+<button class="mic-btn" id="mic-abshodeh" onclick="toggleVoiceInput('abshodeh')">🎤</button>    
+</div>    
+</div>    
+</div>    
+    
+<!-- WORKSHOP -->    
+<div class="section-panel" id="panel-workshop">    
+<div class="sub-tabs">    
+<div class="sub-tab active" data-sub="melt" onclick="switchWorkshopSub('melt')">🔥 ذوب مشتری</div>    
+<div class="sub-tab" data-sub="expense" onclick="switchWorkshopSub('expense')">💰 مخارج مغازه</div>    
+</div>    
+<div class="stat-row" id="workshopStats"></div>    
+<div class="records-scroll" id="workshopRecords"></div>    
+<div class="input-area">    
+<div class="transcript-box" id="workshopTranscript">برای ثبت سریع بنویسید...</div>    
+<div class="input-row">    
+<input type="text" class="text-input" id="workshopTextInput" placeholder="مثلا: ذوب شماره ۱۲">    
+<button class="send-btn" onclick="sendText('workshop')">➤</button>    
+<button class="manual-btn" onclick="openWorkshopManual()">📝</button>    
+<button class="mic-btn" id="mic-workshop" onclick="toggleVoiceInput('workshop')">🎤</button>    
+</div>    
+</div>    
+</div>    
+    
+<!-- SUMMARY -->    
+<div class="section-panel" id="panel-summary">    
+<div class="summary-scroll" id="summaryScroll"></div>    
+</div>    
+    
+<div class="status-bar"><span id="statusText">✅ آفلاین - محلی</span><span id="dataCount">۰ رکورد</span></div>    
+</div>    
+    
+<!-- ===== MODAL ===== -->    
+<div class="modal-overlay hidden" id="modalOverlay" onclick="if(event.target===this) closeModal()">    
+<div class="modal-box" id="modalBox"></div>    
+</div>    
+    
+<script>    
+// ============================================================    
+// دستیار طلا - نسخه کامل با قابلیت پشتیبان و اشتراک‌گذاری    
+// ============================================================    
+    
+// ===== ۱. STORAGE =====    
+let DB={    
+config:{password:null,users:[]},    
+accounts:{list:[]},    
+entities:{list:[]},    
+vitrine:{ojratTrades:[],priceTrades:[],invWeight:0,invAvgCost:0},    
+abshodeh:{trades:[],invWeight:0,invAvgCost:0},    
+workshop:{melts:[],expenses:[]}    
+};    
+// نسخه سبک: فقط ارقام فارسی/عربی و جداکننده اعشار رو تبدیل می‌کنه، حروف و کلمات متن دست نمی‌خوره (برای ورودی متنی/صوتی آزاد)    
+function normalizeDigitsInText(s){    
+  if(s==null)return s;    
+  s=String(s);    
+  const fa='۰۱۲۳۴۵۶۷۸۹',ar='٠١٢٣٤٥٦٧٨٩';    
+  s=s.replace(/[۰-۹]/g,d=>String(fa.indexOf(d))).replace(/[٠-٩]/g,d=>String(ar.indexOf(d)));    
+  s=s.replace(/(\d)[٫،](\d)/g,'$1.$2');    
+  return s;    
+}    
+// تبدیل ارقام فارسی/عربی و انواع جداکننده اعشار (٫ ، ,) به فرمت استاندارد انگلیسی قابل parseFloat (برای فیلدهای عددی خالص)    
+function toEnglishNum(s){    
+  if(s==null)return s;    
+  s=String(s);    
+  const fa='۰۱۲۳۴۵۶۷۸۹',ar='٠١٢٣٤٥٦٧٨٩';    
+  s=s.replace(/[۰-۹]/g,d=>String(fa.indexOf(d))).replace(/[٠-٩]/g,d=>String(ar.indexOf(d)));    
+  s=s.replace(/[٫،,]/g,'.');    
+  s=s.replace(/[^0-9.\-]/g,'');    
+  const parts=s.split('.');    
+  if(parts.length>2)s=parts[0]+'.'+parts.slice(1).join('');    
+  return s;    
+}    
+const STORAGE_KEYS=['config','accounts','entities','vitrine','abshodeh','workshop'];    
+function loadAll(){try{for(const k of STORAGE_KEYS){const d=localStorage.getItem('gold_'+k);if(d) DB[k]=JSON.parse(d);}}catch(e){}}    
+function saveKey(k){try{localStorage.setItem('gold_'+k,JSON.stringify(DB[k]));}catch(e){}}    
+function saveAll(){STORAGE_KEYS.forEach(k=>saveKey(k));}    
+  
+// ===== ۰. اتصال به تلگرام (Telegram Mini App) =====    
+const tg=(window.Telegram&&window.Telegram.WebApp)?window.Telegram.WebApp:null;    
+const isTelegramApp=!!(tg&&tg.initData);    
+function initTelegram(){    
+  if(!tg)return;    
+  try{tg.ready();}catch(e){}    
+  try{tg.expand();}catch(e){}    
+  try{tg.setHeaderColor('#0F0F0F');}catch(e){}    
+  try{tg.setBackgroundColor('#0F0F0F');}catch(e){}    
+  try{tg.enableClosingConfirmation();}catch(e){}    
+  try{    
+    tg.BackButton.onClick(function(){    
+      const modalOpen=!document.getElementById('modalOverlay').classList.contains('hidden');    
+      if(modalOpen){closeModal();return;}    
+      if(currentUser){logout();return;}    
+    });    
+  }catch(e){}    
+}    
+function updateBackButton(){    
+  if(!tg)return;    
+  try{    
+    const modalOpen=!document.getElementById('modalOverlay').classList.contains('hidden');    
+    if(modalOpen||currentUser){tg.BackButton.show();}else{tg.BackButton.hide();}    
+  }catch(e){}    
+}    
+// نمایش پیام/تایید: روی تلگرام از popup بومی استفاده می‌کنیم، در مرورگر عادی از alert/confirm    
+function tgAlert(msg){if(tg){try{tg.showAlert(msg);return;}catch(e){}}alert(msg);}    
+function tgConfirm(msg,cb){if(tg){try{tg.showConfirm(msg,function(ok){if(ok)cb();});return;}catch(e){}}if(confirm(msg))cb();}    
+// کپی متن در کلیپ‌بورد (راه مطمئن پشتیبان‌گیری داخل تلگرام، چون دانلود فایل در WebView تلگرام کار نمی‌کند)    
+async function copyTextToClipboard(text){    
+  try{await navigator.clipboard.writeText(text);return true;}catch(e){}    
+  try{const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.focus();ta.select();const ok=document.execCommand('copy');document.body.removeChild(ta);return ok;}catch(e){return false;}    
+}    
+    
+// ===== ۲. UTILITIES =====    
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}    
+function fmt(n){return Math.round(n||0).toLocaleString('fa-IR');}    
+function fmtW(n){return (Math.round((n||0)*100)/100).toLocaleString('fa-IR');}    
+function todayStr(){return new Date().toLocaleDateString('fa-IR');}    
+function nowTimeStr(){return new Date().toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'});}    
+function getEntity(id){return DB.entities.list.find(e=>e.id===id);}    
+function getAccount(id){return DB.accounts.list.find(a=>a.id===id);}    
+function ensureEntity(name,type){if(!name)return null;let e=DB.entities.list.find(e=>e.name===name);if(!e){e={id:uid(),name,type:type||'walkin',balance:0};DB.entities.list.push(e);}return e;}    
+function adjustEntityBalance(id,d){const e=getEntity(id);if(e)e.balance=(e.balance||0)+d;}    
+function adjustAccountBalance(id,d){const a=getAccount(id);if(a)a.balance=(a.balance||0)+d;}    
+    
+let currentUser=null,currentSection='vitrine',currentVitrineSub='ojrat',currentWorkshopSub='melt';    
+let isListening=false,voiceRecognition=null;    
+    
+// ===== ۳. USER SELECT (بدون رمز) =====    
+function initApp(){initTelegram();loadAll();updateStatusBar();renderUserList();updateBackButton();if(isTelegramApp){document.querySelectorAll('.mic-btn').forEach(b=>b.classList.add('hidden'));}}    
+function renderUserList(){const l=document.getElementById('userList');l.innerHTML='';DB.config.users.forEach(u=>{const d=document.createElement('div');d.className='user-pill';d.textContent=u.name;d.onclick=()=>selectUser(u);l.appendChild(d);});}    
+function addNewUser(){const inp=document.getElementById('newUserName');const n=inp.value.trim();if(!n)return;const u={id:uid(),name:n};DB.config.users.push(u);saveKey('config');inp.value='';renderUserList();selectUser(u);}    
+function selectUser(u){currentUser=u;document.getElementById('userScreen').classList.add('hidden');document.getElementById('app').classList.remove('hidden');document.getElementById('currentUserLabel').textContent='کاربر: '+u.name;renderEverything();updateStatusBar();updateBackButton();}    
+function logout(){currentUser=null;document.getElementById('app').classList.add('hidden');document.getElementById('userScreen').classList.remove('hidden');renderUserList();updateBackButton();}    
+    
+// ===== ۴. BACKUP MODAL =====    
+function openBackupModal(){    
+  let html = `<div class=modal-title>📂 مدیریت پشتیبان <button class=modal-close onclick=closeModal()>✕</button></div>`;    
+  if(isTelegramApp){    
+    html += `<p style=color:#8A7A5A;font-size:14px;margin-bottom:12px>💡 داخل تلگرام دانلود فایل کار نمی‌کند؛ پشتیبان را <strong>کپی</strong> کن و در «پیام‌های ذخیره‌شده» Paste کن. برای بازیابی هم متن همان پشتیبان را Paste کن.</p>`;    
+    html += `<button class=modal-save-btn style=background:var(--blue);color:#fff;onclick="downloadBackupNow();closeModal();">📋 کپی پشتیبان به کلیپ‌بورد</button>`;    
+    html += `<div style=height:12px></div>`;    
+    html += `<div class=field><label>📥 بازیابی: متن پشتیبان را Paste کن</label><textarea id=backupPasteInput rows=4 placeholder="متن JSON پشتیبان..."></textarea></div>`;    
+    html += `<button class=modal-save-btn onclick=restoreBackupFromText()>📥 بازیابی از متن</button>`;    
+  }else{    
+    html += `<p style=color:#8A7A5A;font-size:14px;margin-bottom:12px>💡 <strong>اشتراک‌گذاری:</strong> فایل رو به ایمیل، تلگرام یا ذخیره در پوشه بفرستید.<br>💡 <strong>بازیابی:</strong> فایل پشتیبان قبلی رو انتخاب کنید.</p>`;    
+    html += `<button class=modal-save-btn style=background:var(--blue);color:#fff;onclick="shareBackupFile();closeModal();">📤 اشتراک‌گذاری (ایمیل / پوشه)</button>`;    
+    if ('showDirectoryPicker' in window) {    
+      html += `<button class=modal-save-btn style=background:var(--gold-dark);color:var(--gold-light);onclick="saveToSpecificFolder();closeModal();">📁 ذخیره در پوشه خاص (کروم اندروید)</button>`;    
+    }    
+    html += `<div style=height:12px></div>`;    
+    html += `<div class=field><label>📁 بازیابی از فایل</label><input type=file id=backupFileInput accept=.json style=padding:12px;font-size:16px;></div>`;    
+    html += `<button class=modal-save-btn onclick=restoreBackupNow()>📥 بازیابی</button>`;    
+  }    
+  html += `<button class=modal-save-btn style=background:var(--surface2);color:var(--text);margin-top:8px onclick=closeModal()>❌ انصراف</button>`;    
+  openModal(html);    
+}    
+function restoreBackupFromText(){    
+  const ta=document.getElementById('backupPasteInput');const txt=ta?ta.value.trim():'';    
+  if(!txt){tgAlert('❌ متن پشتیبان را Paste کنید');return;}    
+  tgConfirm('⚠️ دیتاهای فعلی جایگزین می‌شوند! ادامه؟',function(){    
+    try{    
+      const backup=JSON.parse(txt);    
+      if(!backup.data){tgAlert('❌ ساختار متن نامعتبر است');return;}    
+      let count=0;STORAGE_KEYS.forEach(k=>{if(backup.data[k]){localStorage.setItem('gold_'+k,JSON.stringify(backup.data[k]));count++;}});    
+      tgAlert('✅ '+count+' بخش بازیابی شد! صفحه دوباره بارگذاری می‌شود.');    
+      setTimeout(()=>location.reload(),800);    
+    }catch(err){tgAlert('❌ خطا: '+err.message);}    
+  });    
+}    
+  
+function downloadBackupNow(){try{const all={};STORAGE_KEYS.forEach(k=>{const d=localStorage.getItem('gold_'+k);if(d)all[k]=JSON.parse(d);});const backup={date:new Date().toISOString(),data:all};const json=JSON.stringify(backup,null,2);if(isTelegramApp){copyTextToClipboard(json).then(ok=>{tgAlert(ok?'✅ پشتیبان در کلیپ‌بورد کپی شد. آن را در «پیام‌های ذخیره‌شده» یا یک فایل متنی Paste کنید.':'❌ کپی ناموفق بود.');});return;}const blob=new Blob([json],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='backup_'+todayStr()+'.json';a.click();URL.revokeObjectURL(url);alert('✅ فایل پشتیبان دانلود شد');}catch(e){tgAlert('❌ خطا: '+e.message);}}    
+function restoreBackupNow(){const fileInput=document.getElementById('backupFileInput');if(!fileInput||!fileInput.files[0]){alert('❌ لطفاً فایل را انتخاب کنید');return;}if(!confirm('⚠️ دیتاهای فعلی جایگزین می‌شوند! ادامه؟'))return;const reader=new FileReader();reader.onload=function(e){try{const backup=JSON.parse(e.target.result);if(!backup.data){alert('❌ ساختار فایل نامعتبر');return;}let count=0;STORAGE_KEYS.forEach(k=>{if(backup.data[k]){localStorage.setItem('gold_'+k,JSON.stringify(backup.data[k]));count++;}});alert('✅ '+count+' فایل بازیابی شد! صفحه را Refresh کنید.');location.reload();}catch(err){alert('❌ خطا: '+err.message);}};reader.readAsText(fileInput.files[0]);}    
+  
+// ===== ۴.۱. SHARE BACKUP (EMAIL / FOLDER) =====    
+async function shareBackupFile() {    
+  try {    
+    const allData = {};    
+    STORAGE_KEYS.forEach(k => {    
+      const d = localStorage.getItem('gold_' + k);    
+      if (d) allData[k] = JSON.parse(d);    
+    });    
+    const backup = { date: new Date().toISOString(), user: currentUser ? currentUser.name : '—', data: allData };    
+    const json = JSON.stringify(backup, null, 2);    
+    if (isTelegramApp) {    
+      const ok = await copyTextToClipboard(json);    
+      tgAlert(ok ? '✅ پشتیبان در کلیپ‌بورد کپی شد. آن را در «پیام‌های ذخیره‌شده» Paste کن.' : '❌ کپی ناموفق بود.');    
+      return;    
+    }    
+    const blob = new Blob([json], { type: 'application/json' });    
+    const file = new File([blob], `gold_backup_${todayStr()}.json`, { type: 'application/json' });    
+  
+    if (navigator.share && navigator.canShare) {    
+      await navigator.share({ title: 'پشتیبان دستیار طلا', text: '📊 فایل پشتیبان تاریخ: ' + todayStr(), files: [file] });    
+      alert('✅ فایل با موفقیت به اشتراک گذاشته شد!');    
+    } else {    
+      const url = URL.createObjectURL(blob);    
+      const a = document.createElement('a');    
+      a.href = url; a.download = `gold_backup_${todayStr()}.json`;    
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);    
+      URL.revokeObjectURL(url);    
+      alert('✅ فایل دانلود شد (مرورگر شما از اشتراک‌گذاری پشتیبانی نمیکند)');    
+    }    
+  } catch (err) {    
+    if (err.name === 'AbortError') { console.log('کاربر انصراف داد'); }    
+    else { alert('❌ خطا: ' + err.message); }    
+  }    
+}    
+  
+// ===== ۴.۲. SAVE TO SPECIFIC FOLDER (ANDROID CHROME) =====    
+async function saveToSpecificFolder() {    
+  try {    
+    if (!('showDirectoryPicker' in window)) {    
+      alert('❌ مرورگر شما از این قابلیت پشتیبانی نمیکند.\nلطفاً از دکمه اشتراک‌گذاری استفاده کنید.');    
+      return;    
+    }    
+    const allData = {};    
+    STORAGE_KEYS.forEach(k => {    
+      const d = localStorage.getItem('gold_' + k);    
+      if (d) allData[k] = JSON.parse(d);    
+    });    
+    const backup = { date: new Date().toISOString(), user: currentUser ? currentUser.name : '—', data: allData };    
+    const json = JSON.stringify(backup, null, 2);    
+    const blob = new Blob([json], { type: 'application/json' });    
+  
+    const dirHandle = await window.showDirectoryPicker();    
+    const fileName = `gold_backup_${todayStr()}.json`;    
+    const fileHandle = await dirHandle.getFileHandle(fileName, { create: true });    
+    const writable = await fileHandle.createWritable();    
+    await writable.write(blob);    
+    await writable.close();    
+  
+    alert('✅ فایل با موفقیت در پوشه‌ی انتخابی ذخیره شد!\n📍 مسیر: ' + dirHandle.name + '/' + fileName);    
+  } catch (err) {    
+    if (err.name === 'AbortError') { console.log('کاربر پوشه را انتخاب نکرد'); }    
+    else { alert('❌ خطا: ' + err.message); }    
+  }    
+}    
+  
+// ===== ۵. NAVIGATION =====    
+function switchSection(s){currentSection=s;document.querySelectorAll('.main-tab').forEach(t=>t.classList.toggle('active',t.dataset.sec===s));document.querySelectorAll('.section-panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-'+s).classList.add('active');if(s==='summary')renderSummary();}    
+function switchVitrineSub(s){currentVitrineSub=s;document.querySelectorAll('#panel-vitrine .sub-tab').forEach(t=>t.classList.toggle('active',t.dataset.sub===s));renderVitrine();}    
+function switchWorkshopSub(s){currentWorkshopSub=s;document.querySelectorAll('#panel-workshop .sub-tab').forEach(t=>t.classList.toggle('active',t.dataset.sub===s));renderWorkshop();}    
+function renderEverything(){renderVitrine();renderAbshodeh();renderWorkshop();renderSummary();updateStatusBar();}    
+  
+// ===== ۶. VOICE =====    
+function toggleVoiceInput(s){if(isListening){stopListening(s);return;}startListening(s);}    
+function startListening(s){if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){tgAlert(isTelegramApp?'🎤 تشخیص صدا داخل تلگرام پشتیبانی نمی‌شود. لطفاً از کادر متنی استفاده کنید.':'مرورگر شما از تشخیص صدا پشتیبانی نمی‌کند');return;}const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!voiceRecognition){voiceRecognition=new SR();voiceRecognition.lang='fa-IR';voiceRecognition.continuous=false;voiceRecognition.interimResults=true;voiceRecognition.onresult=function(e){let txt='';for(let i=e.resultIndex;i<e.results.length;i++)txt+=e.results[i][0].transcript;const b=document.getElementById(s+'Transcript');if(b){b.textContent=txt;b.classList.add('listening');}if(e.results[e.results.length-1].isFinal){processSectionInput(s,txt);stopListening(s);}};voiceRecognition.onerror=function(){stopListening(s);};voiceRecognition.onend=function(){if(isListening)stopListening(s);};}isListening=true;try{voiceRecognition.start();const m=document.getElementById('mic-'+s);if(m)m.classList.add('listening');const b=document.getElementById(s+'Transcript');if(b){b.textContent='🎤 در حال گوش دادن...';b.classList.add('listening');}}catch(e){}}    
+function stopListening(s){isListening=false;if(voiceRecognition){try{voiceRecognition.stop();}catch(e){}}const m=document.getElementById('mic-'+s);if(m)m.classList.remove('listening');const b=document.getElementById(s+'Transcript');if(b){b.classList.remove('listening');b.textContent='برای ثبت سریع بنویسید...';}}    
+  
+// ===== ۷. COMMAND PARSER =====    
+function parseCommand(text,s){text=normalizeDigitsInText(text).trim();const oj=text.match(/^(.+?)\s*(\d+\.?\d*)\s*گرم/i);if(oj&&s==='vitrine'){return{type:'ojrat',itemType:oj[1].trim(),weight:parseFloat(oj[2]),buyOjrat:0,sellOjrat:0,entityName:'مشتری',entityType:'walkin'};}    
+const pr=text.match(/(خرید|فروش)\s*(\d+\.?\d*)\s*گرم(?:\s*با\s*قیمت\s*(\d+))?/i);if(pr&&s==='vitrine'){return{type:'price',direction:pr[1]==='خرید'?'buy':'sell',weight:parseFloat(pr[2]),price:pr[3]?parseFloat(pr[3]):0,entityName:pr[1]==='خرید'?'مشتری':'تهران'};}    
+const ml=text.match(/ذوب\s*(\S+)\s*(\d+\.?\d*)\s*گرم(?:\s*دستمزد\s*(\d+))?/i);if(ml&&s==='workshop'){return{type:'melt',meltNumber:ml[1],weight:parseFloat(ml[2]),fee:ml[3]?parseFloat(ml[3]):0,paid:true,entityName:'مشتری'};}    
+const ab=text.match(/(خرید|فروش)\s*(\d+\.?\d*)\s*گرم\s*آبشده/i);if(ab&&s==='abshodeh'){return{type:'abshodeh',direction:ab[1]==='خرید'?'buy':'sell',weight:parseFloat(ab[2]),price:0,entityName:ab[1]==='خرید'?'مشتری':'تهران'};}    
+return{type:'question',answer:'⚠️ دستور قابل تشخیص نیست. از فرم دستی 📝 استفاده کنید.\nنمونه: گردنبند ۵ گرم'};}    
+  
+// ===== ۸. PROCESS INPUT =====    
+async function processSectionInput(s,t){if(!t)return;const tr=document.getElementById(s+'Transcript');tr.textContent='⏳ در حال پردازش...';await new Promise(r=>setTimeout(r,300));const p=parseCommand(t,s);tr.textContent='برای ثبت سریع بنویسید...';if(p.type==='question'){addMsg(s,p.answer,'assistant');return;}showConfirm(s,p);}    
+function addMsg(s,h,r){const el=document.getElementById(s+'Records');const d=document.createElement('div');d.className='msg '+r;d.style.alignSelf=r==='user'?'flex-end':'flex-start';d.innerHTML=h;el.insertBefore(d,el.firstChild);return d;}    
+let pending={};    
+function showConfirm(s,p){pending[s]=p;let rows='',title='';if(p.type==='ojrat'){title='📋 تأیید اجرتی';rows='<div class=confirm-row><span class=confirm-key>نوع کار</span><span class=confirm-val>'+p.itemType+'</span></div><div class=confirm-row><span class=confirm-key>وزن</span><span class=confirm-val>'+p.weight+' گرم</span></div><div class=confirm-row><span class=confirm-key>طرف</span><span class=confirm-val>'+p.entityName+'</span></div>';}    
+else if(p.type==='price'){title='📋 تأیید تابلو';rows='<div class=confirm-row><span class=confirm-key>عملیات</span><span class=confirm-val>'+(p.direction==='sell'?'فروش':'خرید')+'</span></div><div class=confirm-row><span class=confirm-key>وزن</span><span class=confirm-val>'+p.weight+' گرم</span></div><div class=confirm-row><span class=confirm-key>طرف</span><span class=confirm-val>'+p.entityName+'</span></div>';}    
+else if(p.type==='abshodeh'){title='📋 تأیید آبشده';rows='<div class=confirm-row><span class=confirm-key>عملیات</span><span class=confirm-val>'+(p.direction==='sell'?'فروش':'خرید')+'</span></div><div class=confirm-row><span class=confirm-key>وزن</span><span class=confirm-val>'+p.weight+' گرم</span></div><div class=confirm-row><span class=confirm-key>طرف</span><span class=confirm-val>'+p.entityName+'</span></div>';}    
+else if(p.type==='melt'){title='📋 تأیید ذوب';rows='<div class=confirm-row><span class=confirm-key>شماره</span><span class=confirm-val>'+p.meltNumber+'</span></div><div class=confirm-row><span class=confirm-key>وزن</span><span class=confirm-val>'+p.weight+' گرم</span></div><div class=confirm-row><span class=confirm-key>دستمزد</span><span class=confirm-val>'+fmt(p.fee)+' ت</span></div>';}    
+const html='<div class=confirm-card><div class=confirm-title>'+title+'</div>'+rows+'<div class=card-actions><button class=btn-confirm onclick=confirmEntry("'+s+'")>✅ تأیید</button><button class=btn-cancel onclick=cancelEntry("'+s+'")>❌ لغو</button></div></div>';addMsg(s,html,'assistant');}    
+async function confirmEntry(s){const p=pending[s];if(!p)return;const e=p.entityName?ensureEntity(p.entityName,p.entityType||'walkin'):null;try{if(p.type==='ojrat'){const w=p.weight||0,bo=p.buyOjrat||0,so=p.sellOjrat||0,cp=7,tp=2,op=(so-bo)*w,co=so*w*cp/100,gp=op+co,tx=gp*tp/100,np=gp-tx,sa=so*w;DB.vitrine.ojratTrades.push({id:uid(),date:todayStr(),time:nowTimeStr(),user:currentUser.name,itemType:p.itemType||'—',weight:w,buyOjrat:bo,sellOjrat:so,commPct:cp,taxPct:tp,ojratProfit:op,commission:co,grossProfit:gp,tax:tx,netProfit:np,entityId:e?e.id:null,entityName:e?e.name:'—',entityType:e?e.type:null,accountId:null,received:0});if(e&&sa)adjustEntityBalance(e.id,-sa);saveKey('vitrine');saveKey('entities');renderVitrine();}    
+else if(p.type==='price'){const w=p.weight||0,pr=p.price||0,dir=p.direction||'buy',am=w*pr,inv=DB.vitrine;let profit=0;if(dir==='buy'){const nw=inv.invWeight+w;inv.invAvgCost=nw>0?(inv.invWeight*inv.invAvgCost+w*pr)/nw:pr;inv.invWeight=nw;if(e)adjustEntityBalance(e.id,am);}else{profit=am-w*inv.invAvgCost;inv.invWeight-=w;if(e)adjustEntityBalance(e.id,-am);}DB.vitrine.priceTrades.push({id:uid(),date:todayStr(),time:nowTimeStr(),user:currentUser.name,direction:dir,weight:w,price:pr,amount:am,profit,entityId:e?e.id:null,entityName:e?e.name:(dir==='sell'?'تهران':'—'),entityType:e?e.type:null,accountId:null,received:0});saveKey('vitrine');saveKey('entities');renderVitrine();}    
+else if(p.type==='abshodeh'){const w=p.weight||0,pr=p.price||0,dir=p.direction||'buy',am=w*pr,inv=DB.abshodeh;let profit=0;if(dir==='buy'){const nw=inv.invWeight+w;inv.invAvgCost=nw>0?(inv.invWeight*inv.invAvgCost+w*pr)/nw:pr;inv.invWeight=nw;if(e)adjustEntityBalance(e.id,am);}else{profit=am-w*inv.invAvgCost;inv.invWeight-=w;if(e)adjustEntityBalance(e.id,-am);}DB.abshodeh.trades.push({id:uid(),date:todayStr(),time:nowTimeStr(),user:currentUser.name,direction:dir,weight:w,price:pr,amount:am,profit,entityId:e?e.id:null,entityName:e?e.name:(dir==='sell'?'تهران':'—'),entityType:e?e.type:null,accountId:null,received:0});saveKey('abshodeh');saveKey('entities');renderAbshodeh();}    
+else if(p.type==='melt'){DB.workshop.melts.push({id:uid(),date:todayStr(),time:nowTimeStr(),user:currentUser.name,meltNumber:p.meltNumber||'—',weight:p.weight||0,fee:p.fee||0,paid:true,entityId:e?e.id:null,entityName:e?e.name:'—',entityType:e?e.type:null,accountId:null});saveKey('workshop');saveKey('entities');renderWorkshop();}    
+delete pending[s];renderSummary();updateStatusBar();const el=document.getElementById(s+'Records');if(el.firstChild&&el.firstChild.querySelector&&el.firstChild.querySelector('.confirm-card'))el.firstChild.remove();addMsg(s,'✅ ثبت شد','assistant');}catch(err){alert('❌ خطا: '+err.message);}}    
+function cancelEntry(s){delete pending[s];const el=document.getElementById(s+'Records');if(el.firstChild&&el.firstChild.querySelector&&el.firstChild.querySelector('.confirm-card'))el.firstChild.remove();}    
+function sendText(s){const inp=document.getElementById(s+'TextInput');const t=inp.value.trim();if(!t)return;inp.value='';processSectionInput(s,t);}    
+  
+// ===== ۹. VITRINE =====    
+function openVitrineManual(){_entityTypeSel='walkin';_priceDirSel='buy';openModal('<div class=modal-title>ثبت دستی — ویترین <button class=modal-close onclick=closeModal()>✕</button></div><div class=radio-row><div class=radio-opt '+(currentVitrineSub==='ojrat'?'sel':'')+' onclick=setVitrineModalType("ojrat") id=vmt-ojrat>اجرتی</div><div class=radio-opt '+(currentVitrineSub==='price'?'sel':'')+' onclick=setVitrineModalType("price") id=vmt-price>تابلو (آب)</div></div><div id=vitrineModalBody></div>');setVitrineModalType(currentVitrineSub);}    
+function setVitrineModalType(t){document.getElementById('vmt-ojrat').classList.toggle('sel',t==='ojrat');document.getElementById('vmt-price').classList.toggle('sel',t==='price');const b=document.getElementById('vitrineModalBody');if(t==='ojrat'){b.innerHTML='<div class=field><label>نوع کار</label><input type=text id=f_itemType placeholder="مثلا: گردنبند"></div><div class=field><label>وزن (گرم)</label><input type=text inputmode=decimal id=f_weight step=0.01 oninput=this.value=toEnglishNum(this.value)></div><div class=field-row><div class=field><label>اجرت خرید</label><input type=text inputmode=decimal id=f_buyOjrat oninput=this.value=toEnglishNum(this.value)></div><div class=field><label>اجرت فروش</label><input type=text inputmode=decimal id=f_sellOjrat oninput=this.value=toEnglishNum(this.value)></div></div><div class=field-row><div class=field><label>کارمزد %</label><input type=text inputmode=decimal id=f_commPct value=7 oninput=this.value=toEnglishNum(this.value)></div><div class=field><label>مالیات %</label><input type=text inputmode=decimal id=f_taxPct value=2 oninput=this.value=toEnglishNum(this.value)></div></div><div class=field><label>طرف معامله</label><select id=f_entity>'+entityOptionsHtml()+'</select></div><div class=field><label>نام جدید</label><input type=text id=f_newEntityName placeholder="نام مشتری/همکار"></div><div class=radio-row><div class=radio-opt sel id=f_etype_walkin onclick=toggleEntityType("walkin")>مشتری گذری</div><div class=radio-opt id=f_etype_colleague onclick=toggleEntityType("colleague")>همکار</div></div><button class=modal-save-btn onclick=saveOjratTrade()>ثبت</button>';}else{b.innerHTML='<div class=helper-note>خرید از مشتری زیر قیمت تابلو، یا فروش به تهران</div><div class=radio-row><div class=radio-opt sel id=f_dir_buy onclick=togglePriceDir("buy")>خرید</div><div class=radio-opt id=f_dir_sell onclick=togglePriceDir("sell")>فروش</div></div><div class=field-row><div class=field><label>وزن</label><input type=text inputmode=decimal id=f_weight step=0.01 oninput=this.value=toEnglishNum(this.value)></div><div class=field><label>قیمت هر گرم</label><input type=text inputmode=decimal id=f_price oninput=this.value=toEnglishNum(this.value)></div></div><div class=field><label>طرف معامله</label><select id=f_entity>'+entityOptionsHtml()+'</select></div><div class=field><label>نام جدید</label><input type=text id=f_newEntityName placeholder="نام مشتری/همکار"></div><div class=radio-row><div class=radio-opt sel id=f_etype_walkin onclick=toggleEntityType("walkin")>مشتری گذری</div><div class=radio-opt id=f_etype_colleague onclick=toggleEntityType("colleague")>همکار</div></div><button class=modal-save-btn onclick=savePriceTrade()>ثبت</button>';}}    
+let _entityTypeSel='walkin',_priceDirSel='buy';    
+function toggleEntityType(t){_entityTypeSel=t;document.getElementById('f_etype_walkin').classList.toggle('sel',t==='walkin');document.getElementById('f_etype_colleague').classList.toggle('sel',t==='colleague');}    
+function togglePriceDir(d){_priceDirSel=d;document.getElementById('f_dir_buy').classList.toggle('sel',d==='buy');document.getElementById('f_dir_sell').classList.toggle('sel',d==='sell');}    
+function resolveEntity(){const s=document.getElementById('f_entity').value;if(s)return getEntity(s);const n=document.getElementById('f_newEntityName').value.trim();if(!n)return null;return ensureEntity(n,_entityTypeSel);}    
+function entityOptionsHtml(s){let h='<option value="">— جدید —</option>';DB.entities.list.forEach(e=>{h+='<option value="'+e.id+'" '+(e.id===s?'selected':'')+'>'+e.name+' ('+(e.type==='colleague'?'همکار':'گذری')+')</option>';});return h;}    
+function accountOptionsHtml(s){let h='<option value="">— انتخاب —</option>';DB.accounts.list.forEach(a=>{h+='<option value="'+a.id+'" '+(a.id===s?'selected':'')+'>'+a.name+' ('+fmt(a.balance)+' ت)</option>';});return h;}    
+  
+async function saveOjratTrade(){const it=document.getElementById('f_itemType').value||'—',w=parseFloat(document.getElementById('f_weight').value)||0,bo=parseFloat(document.getElementById('f_buyOjrat').value)||0,so=parseFloat(document.getElementById('f_sellOjrat').value)||0,cp=parseFloat(document.getElementById('f_commPct').value)||0,tp=parseFloat(document.getElementById('f_taxPct').value)||0;if(!w){alert('وزن را وارد کنید');return;}const e=resolveEntity();const op=(so-bo)*w,co=so*w*cp/100,gp=op+co,tx=gp*tp/100,np=gp-tx,sa=so*w;DB.vitrine.ojratTrades.push({id:uid(),date:todayStr(),time:nowTimeStr(),user:currentUser.name,itemType:it,weight:w,buyOjrat:bo,sellOjrat:so,commPct:cp,taxPct:tp,ojratProfit:op,commission:co,grossProfit:gp,tax:tx,netProfit:np,entityId:e?e.id:null,entityName:e?e.name:'—',entityType:e?e.type:null,accountId:null,received:0});if(e&&sa)adjustEntityBalance(e.id,-sa);saveKey('vitrine');saveKey('entities');closeModal();renderVitrine();renderSummary();updateStatusBar();}    
+async function savePriceTrade(){const w=parseFloat(document.getElementById('f_weight').value)||0,pr=parseFloat(document.getElementById('f_price').value)||0;if(!w||!pr){alert('وزن و قیمت را وارد کنید');return;}const e=resolveEntity(),dir=_priceDirSel,am=w*pr,inv=DB.vitrine;let profit=0;if(dir==='buy'){const nw=inv.invWeight+w;inv.invAvgCost=nw>0?(inv.invWeight*inv.invAvgCost+w*pr)/nw:pr;inv.invWeight=nw;if(e)adjustEntityBalance(e.id,am);}else{profit=am-w*inv.invAvgCost;inv.invWeight-=w;if(e)adjustEntityBalance(e.id,-am);}DB.vitrine.priceTrades.push({id:uid(),date:todayStr(),time:nowTimeStr(),user:currentUser.name,direction:dir,weight:w,price:pr,amount:am,profit,entityId:e?e.id:null,entityName:e?e.name:(dir==='sell'?'تهران':'—'),entityType:e?e.type:null,accountId:null,received:0});saveKey('vitrine');saveKey('entities');closeModal();renderVitrine();renderSummary();updateStatusBar();}    
+function deleteOjratTrade(id){if(!confirm('حذف شود؟'))return;DB.vitrine.ojratTrades=DB.vitrine.ojratTrades.filter(t=>t.id!==id);saveKey('vitrine');renderVitrine();renderSummary();updateStatusBar();}    
+function deletePriceTrade(id){if(!confirm('حذف شود؟'))return;DB.vitrine.priceTrades=DB.vitrine.priceTrades.filter(t=>t.id!==id);saveKey('vitrine');renderVitrine();renderSummary();updateStatusBar();}    
+  
+function renderVitrine(){document.querySelectorAll('#panel-vitrine .sub-tab').forEach(t=>t.classList.toggle('active',t.dataset.sub===currentVitrineSub));const st=document.getElementById('vitrineStats'),re=document.getElementById('vitrineRecords');if(currentVitrineSub==='ojrat'){const tp=DB.vitrine.ojratTrades.reduce((s,t)=>s+t.netProfit,0),td=DB.vitrine.ojratTrades.filter(t=>t.date===todayStr()).reduce((s,t)=>s+t.netProfit,0);st.innerHTML='<div class=stat-card><div class=stat-label>سود کل اجرتی</div><div class=stat-value '+(tp>=0?'pos':'neg')+'>'+fmt(tp)+' ت</div></div><div class=stat-card><div class=stat-label>سود امروز</div><div class=stat-value '+(td>=0?'pos':'neg')+'>'+fmt(td)+' ت</div></div><div class=stat-card><div class=stat-label>تعداد</div><div class=stat-value>'+DB.vitrine.ojratTrades.length+'</div></div>';re.innerHTML='';if(!DB.vitrine.ojratTrades.length){re.innerHTML='<div class=empty-note>هنوز معامله اجرتی ثبت نشده</div>';return;}DB.vitrine.ojratTrades.slice().reverse().forEach(t=>{const d=document.createElement('div');d.className='record-item';d.innerHTML='<div class=record-info><div class=record-name>'+t.itemType+' · '+t.entityName+(t.entityType?' <span class=badge '+t.entityType+'>'+(t.entityType==='colleague'?'همکار':'گذری')+'</span>':'')+'</div><div class=record-detail>'+t.date+' '+t.time+' · '+fmtW(t.weight)+' گرم · '+t.user+'</div></div><div style=text-align:left><div class=record-amount pos>+'+fmt(t.netProfit)+' ت</div><div class=del-x onclick=deleteOjratTrade("'+t.id+'")>🗑</div></div>';re.appendChild(d);});}else{const sl=DB.vitrine.priceTrades.filter(t=>t.direction==='sell'),tp=sl.reduce((s,t)=>s+t.profit,0);st.innerHTML='<div class=stat-card><div class=stat-label>موجودی طلا</div><div class=stat-value>'+fmtW(DB.vitrine.invWeight)+' گرم</div></div><div class=stat-card><div class=stat-label>میانگین خرید</div><div class=stat-value>'+fmt(DB.vitrine.invAvgCost)+' ت</div></div><div class=stat-card><div class=stat-label>سود کل</div><div class=stat-value '+(tp>=0?'pos':'neg')+'>'+fmt(tp)+' ت</div></div>';re.innerHTML='';if(!DB.vitrine.priceTrades.length){re.innerHTML='<div class=empty-note>هنوز معامله تابلو ثبت نشده</div>';return;}DB.vitrine.priceTrades.slice().reverse().forEach(t=>{const d=document.createElement('div');d.className='record-item';d.innerHTML='<div class=record-info><div class=record-name>'+t.entityName+(t.entityType?' <span class=badge '+t.entityType+'>'+(t.entityType==='colleague'?'همکار':'گذری')+'</span>':'')+'</div><div class=record-detail>'+t.date+' '+t.time+' · '+fmtW(t.weight)+' گرم × '+fmt(t.price)+' ت · '+t.user+'</div></div><div style=text-align:left><div class=record-amount '+(t.direction==='sell'?'sell':'buy')+'>'+(t.direction==='sell'?'فروش':'خرید')+'</div>'+(t.direction==='sell'?'<div class=record-amount '+(t.profit>=0?'pos':'neg')+'>'+(t.profit>=0?'+':'')+fmt(t.profit)+' ت</div>':'')+'<div class=del-x onclick=deletePriceTrade("'+t.id+'")>🗑</div></div>';re.appendChild(d);});}}    
+  
+// ===== ۱۰. ABSHODEH =====    
+function openAbshodehManual(){_priceDirSel='buy';_entityTypeSel='walkin';openModal('<div class=modal-title>💎 ثبت معامله آبشده <button class=modal-close onclick=closeModal()>✕</button></div><div class=field><label>👤 مشتری</label><select id=abshCustomer style=width:100%;background:var(--surface2);border:1px solid #333;border-radius:10px;padding:14px 16px;font-size:18px;color:var(--text);outline:none;>'+entityOptionsHtml()+'</select></div><div class=field><label>➕ مشتری جدید</label><input type=text id=abshNewCustomer placeholder="نام مشتری جدید"></div><div class=radio-row><div class=radio-opt sel id=abshDir_buy onclick=setAbshDirection("buy")>🛒 خرید از مشتری</div><div class=radio-opt id=abshDir_sell onclick=setAbshDirection("sell")>💰 فروش به مشتری</div></div><div class=field-row><div class=field><label>⚖️ وزن (گرم)</label><input type=text inputmode=decimal id=abshWeight step=0.01 placeholder="وزن" oninput=calcAbshPrice()></div><div class=field><label>🏷️ عیار</label><input type=text inputmode=decimal id=abshKarat value=750 step=1 min=0 max=999 placeholder="عیار" oninput=calcAbshPrice()></div></div><div class=field><label>💰 قیمت هر گرم</label><input type=text inputmode=decimal id=abshPrice placeholder="قیمت" oninput=calcAbshPrice()></div><div class=field><label>📊 درصد تخفیف/اضافه</label><input type=text inputmode=decimal id=abshPercent value=0 step=0.1 placeholder="۰" oninput=calcAbshPrice()><div style=font-size:12px;color:var(--text-dim);margin-top:4px><span id=abshPercentLabel>💰 تخفیف در خرید = قیمت کمتر</span></div></div><div style=background:var(--surface2);border-radius:12px;padding:14px;margin-bottom:12px;border:1px solid var(--gold-dark)><div style=display:flex;justify-content:space-between;font-size:16px><span>⚖️ وزن خالص (عیار ۷۵۰):</span><span id=abshNetWeight style=font-weight:700;color:var(--gold)>۰ گرم</span></div><div style=display:flex;justify-content:space-between;font-size:16px;margin-top:6px><span>💰 مبلغ کل:</span><span id=abshTotalAmount style=font-weight:700;color:var(--gold)>۰ تومان</span></div></div><div class=field><label>📝 توضیحات</label><textarea id=abshNote rows=2 style=width:100%;background:var(--surface2);border:1px solid #333;border-radius:10px;padding:14px 16px;font-size:18px;color:var(--text);outline:none;resize:vertical;font-family:inherit></textarea></div><div class=radio-row><div class=radio-opt sel id=abshPaid_yes onclick=setAbshPaid(true)>✅ تسویه شده</div><div class=radio-opt id=abshPaid_no onclick=setAbshPaid(false)>❌ تسویه نشده</div></div><div class=field id=abshAccountWrap><label>🏦 از/به حساب</label><select id=abshAccount style=width:100%;background:var(--surface2);border:1px solid #333;border-radius:10px;padding:14px 16px;font-size:18px;color:var(--text);outline:none;>'+accountOptionsHtml()+'</select></div><div style=display:flex;gap:10px;margin-top:10px><button class=modal-save-btn style=flex:1 onclick=saveAbshTrade()>✅ ثبت</button><button class=modal-save-btn style=flex:1;background:var(--surface2);color:var(--text);onclick=closeModal()>❌ انصراف</button></div>');_abshDirection='buy';_abshPaid=true;calcAbshPrice();}    
+let _abshDirection='buy',_abshPaid=true;    
+function setAbshDirection(d){_abshDirection=d;document.getElementById('abshDir_buy').classList.toggle('sel',d==='buy');document.getElementById('abshDir_sell').classList.toggle('sel',d==='sell');const l=document.getElementById('abshPercentLabel');if(d==='buy'){l.textContent='💰 تخفیف در خرید (قیمت کمتر از تابلو)';}else{l.textContent='💰 اضافه در فروش (قیمت بیشتر از تابلو)';}calcAbshPrice();}    
+function setAbshPaid(p){_abshPaid=p;document.getElementById('abshPaid_yes').classList.toggle('sel',p===true);document.getElementById('abshPaid_no').classList.toggle('sel',p===false);const w=document.getElementById('abshAccountWrap');if(w)w.style.display=p?'block':'none';}    
+function calcAbshPrice(){['abshWeight','abshKarat','abshPrice','abshPercent'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=toEnglishNum(el.value);});const w=parseFloat(document.getElementById('abshWeight').value)||0;const k=parseFloat(document.getElementById('abshKarat').value)||750;const p=parseFloat(document.getElementById('abshPrice').value)||0;const pc=parseFloat(document.getElementById('abshPercent').value)||0;const nw=w*(k/750);document.getElementById('abshNetWeight').textContent=fmtW(nw)+' گرم';let fp=p;if(_abshDirection==='buy'){fp=p*(1-pc/100);}else{fp=p*(1+pc/100);}const ta=nw*fp;document.getElementById('abshTotalAmount').textContent=fmt(ta)+' تومان';}    
+async function saveAbshTrade(){const cid=document.getElementById('abshCustomer').value;const nc=document.getElementById('abshNewCustomer').value.trim();const w=parseFloat(document.getElementById('abshWeight').value)||0;const k=parseFloat(document.getElementById('abshKarat').value)||750;const p=parseFloat(document.getElementById('abshPrice').value)||0;const pc=parseFloat(document.getElementById('abshPercent').value)||0;const note=document.getElementById('abshNote').value.trim();const aid=document.getElementById('abshAccount').value;const paid=_abshPaid;const dir=_abshDirection;if(w<=0){alert('وزن را وارد کنید');return;}if(p<=0){alert('قیمت را وارد کنید');return;}let entity=null;if(cid){entity=getEntity(cid);}else if(nc){entity=ensureEntity(nc,'walkin');}else{alert('مشتری را انتخاب کنید');return;}if(!entity){alert('خطا در شناسایی مشتری');return;}const nw=w*(k/750);let fp=p;if(dir==='buy'){fp=p*(1-pc/100);}else{fp=p*(1+pc/100);}const ta=nw*fp;const trade={id:uid(),date:todayStr(),time:nowTimeStr(),customerId:entity.id,customerName:entity.name,direction:dir,weight:w,karat:k,netWeight:nw,price:p,finalPrice:fp,percent:pc,totalAmount:ta,note:note||'—',paid:paid,accountId:aid||null,user:currentUser?currentUser.name:'—'};if(!DB.abshodeh.trades)DB.abshodeh.trades=[];DB.abshodeh.trades.push(trade);if(paid){if(aid){if(dir==='buy'){adjustAccountBalance(aid,-ta);}else{adjustAccountBalance(aid,ta);}saveKey('accounts');}}else{if(dir==='buy'){adjustEntityBalance(entity.id,ta);}else{adjustEntityBalance(entity.id,-ta);}saveKey('entities');}saveKey('abshodeh');closeModal();renderAbshodeh();renderSummary();updateStatusBar();alert('✅ معامله آبشده برای '+entity.name+' با مبلغ '+fmt(ta)+' تومان ثبت شد');}    
+function deleteAbshTrade(id){if(!confirm('حذف شود؟'))return;DB.abshodeh.trades=DB.abshodeh.trades.filter(t=>t.id!==id);saveKey('abshodeh');renderAbshodeh();renderSummary();updateStatusBar();}    
+function renderAbshodeh(){const st=document.getElementById('abshodehStats'),re=document.getElementById('abshodehRecords');const trades=DB.abshodeh.trades||[];const totalBuy=trades.filter(t=>t.direction==='buy').reduce((s,t)=>s+t.totalAmount,0);const totalSell=trades.filter(t=>t.direction==='sell').reduce((s,t)=>s+t.totalAmount,0);const totalProfit=totalSell-totalBuy;const todayBuy=trades.filter(t=>t.direction==='buy'&&t.date===todayStr()).reduce((s,t)=>s+t.totalAmount,0);const todaySell=trades.filter(t=>t.direction==='sell'&&t.date===todayStr()).reduce((s,t)=>s+t.totalAmount,0);const todayProfit=todaySell-todayBuy;st.innerHTML='<div class=stat-card><div class=stat-label>💰 خرید کل</div><div class=stat-value neg>'+fmt(totalBuy)+' ت</div></div><div class=stat-card><div class=stat-label>💰 فروش کل</div><div class=stat-value pos>'+fmt(totalSell)+' ت</div></div><div class=stat-card><div class=stat-label>📈 سود کل</div><div class=stat-value '+(totalProfit>=0?'pos':'neg')+'>'+(totalProfit>=0?'+':'')+fmt(totalProfit)+' ت</div></div>';re.innerHTML='';if(!trades.length){re.innerHTML='<div class=empty-note>هنوز معامله آبشده ثبت نشده</div>';return;}trades.slice().reverse().forEach(t=>{const d=document.createElement('div');d.className='record-item';d.innerHTML='<div class=record-info><div class=record-name>'+t.customerName+' <span class=badge '+(t.direction==='buy'?'walkin':'colleague')+'>'+(t.direction==='buy'?'خرید':'فروش')+'</span></div><div class=record-detail>'+t.date+' '+t.time+' · '+fmtW(t.weight)+' گرم · عیار '+t.karat+' · وزن خالص: '+fmtW(t.netWeight)+' گرم · '+t.user+'</div></div><div style=text-align:left><div class=record-amount '+(t.direction==='sell'?'pos':'neg')+'>'+(t.direction==='sell'?'+':'')+fmt(t.totalAmount)+' ت</div><div class=del-x onclick=deleteAbshTrade("'+t.id+'")>🗑</div></div>';re.appendChild(d);});}    
+  
+// ===== ۱۱. WORKSHOP =====    
+function openWorkshopManual(){_entityTypeSel='walkin';_paidSel=true;openModal('<div class=modal-title>🔥 ثبت ذوب <button class=modal-close onclick=closeModal()>✕</button></div><div class=field><label>👤 مشتری</label><select id=meltCustomer style=width:100%;background:var(--surface2);border:1px solid #333;border-radius:10px;padding:14px 16px;font-size:18px;color:var(--text);outline:none;>'+entityOptionsHtml()+'</select></div><div class=field><label>➕ مشتری جدید</label><input type=text id=meltNewCustomer placeholder="نام مشتری جدید"></div><div class=field><label>📦 شماره پاکت</label><input type=text id=meltNumber placeholder="شماره ذوب"></div><div class=field><label>⚖️ وزن (گرم)</label><input type=text inputmode=decimal id=meltWeight step=0.01 placeholder="وزن" oninput=calcMeltPrice()></div><div class=field><label>💰 قیمت ذوب (تومان)</label><div style=display:flex;gap:8px;align-items:center><input type=text inputmode=decimal id=meltPrice style=flex:1;background:var(--surface2);border:1px solid #333;border-radius:10px;padding:14px 16px;font-size:18px;color:var(--text);outline:none; oninput=this.value=toEnglishNum(this.value)><span style=font-size:13px;color:var(--text-dim)>(پیش‌فرض: ۰)</span></div><div style=font-size:12px;color:var(--text-dim);margin-top:4px>💡 قیمت بر اساس وزن: هر ۱۰۰ گرم = ۱۰۰,۰۰۰ تومان</div></div><div class=field><label>📝 توضیحات</label><textarea id=meltNote rows=2 style=width:100%;background:var(--surface2);border:1px solid #333;border-radius:10px;padding:14px 16px;font-size:18px;color:var(--text);outline:none;resize:vertical;font-family:inherit></textarea></div><div class=radio-row><div class=radio-opt sel id=meltPaid_yes onclick=toggleMeltPaid(true)>✅ تسویه شده</div><div class=radio-opt id=meltPaid_no onclick=toggleMeltPaid(false)>❌ تسویه نشده</div></div><div style=display:flex;gap:10px;margin-top:10px><button class=modal-save-btn style=flex:1 onclick=saveMeltRecord()>✅ ثبت</button><button class=modal-save-btn style=flex:1;background:var(--surface2);color:var(--text);onclick=closeModal()>❌ انصراف</button></div>');_meltPaid=true;calcMeltPrice();}    
+let _meltPaid=true;    
+function toggleMeltPaid(p){_meltPaid=p;document.getElementById('meltPaid_yes').classList.toggle('sel',p===true);document.getElementById('meltPaid_no').classList.toggle('sel',p===false);}    
+function calcMeltPrice(){const wEl=document.getElementById('meltWeight');if(wEl)wEl.value=toEnglishNum(wEl.value);const w=parseFloat(wEl.value)||0;const basePrice=800000+Math.floor(w/100)*100000;document.getElementById('meltPrice').value=basePrice;}    
+async function saveMeltRecord(){const cid=document.getElementById('meltCustomer').value;const nc=document.getElementById('meltNewCustomer').value.trim();const mn=document.getElementById('meltNumber').value.trim();const w=parseFloat(document.getElementById('meltWeight').value)||0;const p=parseFloat(document.getElementById('meltPrice').value)||0;const note=document.getElementById('meltNote').value.trim();const paid=_meltPaid;if(!mn){alert('شماره پاکت را وارد کنید');return;}if(w<=0){alert('وزن را وارد کنید');return;}if(p<=0){alert('قیمت را وارد کنید');return;}let entity=null;if(cid){entity=getEntity(cid);}else if(nc){entity=ensureEntity(nc,'walkin');}else{alert('مشتری را انتخاب کنید');return;}if(!entity){alert('خطا در شناسایی مشتری');return;}const melt={id:uid(),date:todayStr(),time:nowTimeStr(),meltNumber:mn,customerId:entity.id,customerName:entity.name,weight:w,price:p,note:note||'—',paid:paid,user:currentUser?currentUser.name:'—',profit:p*0.5};if(!DB.workshop.melts)DB.workshop.melts=[];DB.workshop.melts.push(melt);if(!paid){adjustEntityBalance(entity.id,-p);saveKey('entities');}saveKey('workshop');closeModal();renderWorkshop();renderSummary();updateStatusBar();alert('✅ ذوب شماره '+mn+' برای '+entity.name+' با مبلغ '+fmt(p)+' تومان ثبت شد');}    
+function deleteMelt(id){if(!confirm('حذف شود؟'))return;DB.workshop.melts=DB.workshop.melts.filter(m=>m.id!==id);saveKey('workshop');renderWorkshop();renderSummary();updateStatusBar();}    
+function renderWorkshop(){document.querySelectorAll('#panel-workshop .sub-tab').forEach(t=>t.classList.toggle('active',t.dataset.sub===currentWorkshopSub));const st=document.getElementById('workshopStats'),re=document.getElementById('workshopRecords');const melts=DB.workshop.melts||[];const totalIncome=melts.reduce((s,t)=>s+t.price,0);const totalProfit=melts.reduce((s,t)=>s+t.profit,0);const unpaid=melts.filter(t=>!t.paid).reduce((s,t)=>s+t.price,0);st.innerHTML='<div class=stat-card><div class=stat-label>🔥 تعداد ذوب</div><div class=stat-value>'+melts.length+'</div></div><div class=stat-card><div class=stat-label>💰 کل دریافتی</div><div class=stat-value pos>'+fmt(totalIncome)+' ت</div></div><div class=stat-card><div class=stat-label>📈 سود خالص (۵۰%)</div><div class=stat-value pos>'+fmt(totalProfit)+' ت</div></div>';re.innerHTML='';if(!melts.length){re.innerHTML='<div class=empty-note>هنوز ذوبی ثبت نشده</div>';return;}const groups={};melts.forEach(m=>{if(!groups[m.customerId]){groups[m.customerId]={name:m.customerName,melts:[]};}groups[m.customerId].melts.push(m);});Object.keys(groups).forEach(cid=>{const g=groups[cid];const totalDebt=g.melts.filter(m=>!m.paid).reduce((s,m)=>s+m.price,0);const d=document.createElement('div');d.className='record-item';d.style.borderRight=totalDebt>0?'3px solid var(--red)':'3px solid var(--green)';d.style.flexDirection='column';d.style.alignItems='stretch';let html='<div style=display:flex;justify-content:space-between;align-items:center;margin-bottom:6px><div class=record-name>👤 '+g.name+'</div><div style=display:flex;gap:12px;align-items:center><span style=font-size:13px;color:var(--text-dim)>'+g.melts.length+' ذوب</span>'+(totalDebt>0?'<span style=color:var(--red);font-weight:700>بدهکار: '+fmt(totalDebt)+' ت</span>':'<span style=color:var(--green)>✅ تسویه</span>')+'</div></div>';g.melts.slice().reverse().forEach(m=>{html+='<div style=display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:var(--surface);border-radius:8px;margin-top:4px;font-size:14px><div style=display:flex;gap:12px;flex-wrap:wrap><span>📦 #'+m.meltNumber+'</span><span>⚖️ '+m.weight+' گرم</span><span>💰 '+fmt(m.price)+' ت</span><span>'+m.date+'</span>'+(m.paid?'<span style=color:var(--green)>✅ پرداخت</span>':'<span style=color:var(--red)>❌ دفتری</span>')+'</div><div style=display:flex;gap:6px><span class=del-x onclick=deleteMelt("'+m.id+'") style=font-size:14px>🗑</span></div></div>';});d.innerHTML=html;re.appendChild(d);});}    
+  
+// ===== ۱۲. SETTINGS (با دکمه بازیابی) =====    
+function openSettings(){    
+  let html = `<div class=modal-title>⚙️ تنظیمات <button class=modal-close onclick=closeModal()>✕</button></div>`;    
+  html += `<button class=modal-save-btn style=background:var(--gold-dark);color:var(--gold-light);margin-bottom:12px onclick="openBackupModal();closeModal();">📂 بازیابی پشتیبان</button>`;    
+  html += `<div style=font-size:16px;font-weight:700;color:var(--gold);margin-bottom:10px>🏦 حساب‌ها</div><div id=accountsListWrap></div>`;    
+  html += `<div class=field-row style=margin-top:10px><div class=field><input type=text id=newAccName placeholder="نام حساب"></div><div class=field><input type=text inputmode=decimal id=newAccBalance placeholder="مانده" oninput=this.value=toEnglishNum(this.value)></div></div>`;    
+  html += `<button class=modal-save-btn onclick=addAccount()>+ افزودن حساب</button>`;    
+  html += `<div style=font-size:16px;font-weight:700;color:var(--gold);margin:20px 0 10px>👤 اشخاص</div><div id=entitiesListWrap></div>`;    
+  html += `<div class=field-row style=margin-top:10px><div class=field><input type=text id=newEntName placeholder="نام"></div><div class=field><select id=newEntType style=padding:14px;font-size:18px><option value=walkin>مشتری</option><option value=colleague>همکار</option></select></div></div>`;    
+  html += `<button class=modal-save-btn onclick=addEntity()>+ افزودن شخص</button>`;    
+  html += `<hr style=border-color:#2A2A2A;margin:16px 0>`;    
+  html += `<button class=modal-save-btn onclick=exportToExcel()>📊 خروجی اکسل</button>`;    
+  html += `<button class=modal-save-btn style=margin-top:8px;background:var(--green);onclick="shareBackupFile();closeModal();">📤 اشتراک‌گذاری (ایمیل/پوشه)</button>`;    
+  if ('showDirectoryPicker' in window) {    
+    html += `<button class=modal-save-btn style=margin-top:8px;background:var(--gold-dark);color:var(--gold-light);onclick="saveToSpecificFolder();closeModal();">📁 ذخیره در پوشه خاص</button>`;    
+  }    
+  html += `<button class=modal-save-btn style=margin-top:8px;background:var(--red);color:white;onclick=clearAllData()>🗑 پاک کردن همه داده‌ها</button>`;    
+  openModal(html);    
+  renderSettingsLists();    
+}    
+  
+function renderSettingsLists(){const aw=document.getElementById('accountsListWrap');if(!aw)return;if(DB.accounts.list.length===0){aw.innerHTML='<div class=empty-note>حسابی ثبت نشده</div>';}else{aw.innerHTML=DB.accounts.list.map(a=>`<div class=entity-row><div class=entity-name>${a.name}</div><div style=display:flex;align-items:center;gap:8px><span class=record-amount ${a.balance>=0?'pos':'neg'}>${fmt(a.balance)} ت</span><span class=link-btn style=margin:0;cursor:pointer;color:var(--gold);onclick=editAccount("${a.id}")>✏️</span><span class=del-x onclick=deleteAccount("${a.id}") style=cursor:pointer;>🗑</span></div></div>`).join('');}    
+function entityRowHtml(e){return `<div class=entity-row><div class=entity-name>${e.name}</div><div style=display:flex;align-items:center;gap:8px;flex-wrap:wrap><span class=record-amount ${e.balance>0?'neg':(e.balance<0?'pos':'')}>${e.balance===0?'✅ تسویه':(e.balance>0?'بدهکاریم '+fmt(e.balance):'طلب داریم '+fmt(Math.abs(e.balance)))}</span><span class=link-btn style=margin:0;cursor:pointer;color:var(--gold);onclick=editEntityBalance("${e.id}")>✏️</span><span class=link-btn style=margin:0;cursor:pointer;color:var(--green);onclick=settleEntity("${e.id}")>💰 تسویه</span><span class=del-x onclick=deleteEntity("${e.id}") style=cursor:pointer;>🗑</span></div></div>`;}    
+const ew=document.getElementById('entitiesListWrap');if(!ew)return;if(DB.entities.list.length===0){ew.innerHTML='<div class=empty-note>هیچ شخصی ثبت نشده</div>';}else{const colleagues=DB.entities.list.filter(e=>e.type==='colleague');const walkins=DB.entities.list.filter(e=>e.type!=='colleague');let h='';h+='<div style=font-size:14px;font-weight:700;color:var(--gold);margin:6px 0 8px>🤝 همکاران ('+colleagues.length+')</div>';h+=colleagues.length?colleagues.map(entityRowHtml).join(''):'<div class=empty-note>همکاری ثبت نشده</div>';h+='<div style=font-size:14px;font-weight:700;color:var(--gold);margin:18px 0 8px>👤 مشتریان ('+walkins.length+')</div>';h+=walkins.length?walkins.map(entityRowHtml).join(''):'<div class=empty-note>مشتری ثبت نشده</div>';ew.innerHTML=h;}}    
+function editAccount(id){const a=getAccount(id);if(!a)return;const n=prompt('نام جدید:',a.name);if(n!==null&&n.trim()!==''){a.name=n.trim();saveKey('accounts');renderSettingsLists();renderSummary();updateStatusBar();}const b=prompt('مانده جدید (تومان):',a.balance);if(b!==null){const num=parseFloat(b);if(!isNaN(num)){a.balance=num;saveKey('accounts');renderSettingsLists();renderSummary();updateStatusBar();}}}    
+function editEntityBalance(id){const e=getEntity(id);if(!e)return;const n=prompt('نام جدید:',e.name);if(n!==null&&n.trim()!==''){e.name=n.trim();saveKey('entities');renderSettingsLists();renderSummary();updateStatusBar();}const b=prompt('مانده جدید (تومان):',e.balance);if(b!==null){const num=parseFloat(b);if(!isNaN(num)){e.balance=num;saveKey('entities');renderSettingsLists();renderSummary();updateStatusBar();}}}    
+function settleEntity(id){const e=getEntity(id);if(!e)return;if(e.balance===0){alert('✅ حساب '+e.name+' تسویه است');return;}const isDebt=e.balance>0;const amount=Math.abs(e.balance);if(!confirm('💰 تسویه با '+e.name+'\n'+(isDebt?'ما بدهکاریم':'مشتری بدهکار است')+': '+fmt(amount)+' تومان'))return;let aid=null;if(DB.accounts.list.length>0){const opts=DB.accounts.list.map((a,i)=>`${i+1}) ${a.name} (${fmt(a.balance)} ت)`).join('\n');const ch=prompt('از کدام حساب؟\n'+opts,'1');if(ch!==null&&ch!==''){const idx=parseInt(ch)-1;if(idx>=0&&idx<DB.accounts.list.length)aid=DB.accounts.list[idx].id;}}    
+if(isDebt){adjustEntityBalance(id,-amount);if(aid)adjustAccountBalance(aid,-amount);}else{adjustEntityBalance(id,amount);if(aid)adjustAccountBalance(aid,amount);}    
+saveKey('entities');if(aid)saveKey('accounts');alert('✅ تسویه انجام شد');renderSettingsLists();renderSummary();updateStatusBar();}    
+function deleteAccount(id){if(!confirm('حذف شود؟'))return;DB.accounts.list=DB.accounts.list.filter(a=>a.id!==id);saveKey('accounts');renderSettingsLists();renderSummary();updateStatusBar();}    
+function deleteEntity(id){if(!confirm('حذف شود؟'))return;DB.entities.list=DB.entities.list.filter(e=>e.id!==id);saveKey('entities');renderSettingsLists();renderSummary();updateStatusBar();}    
+function addAccount(){const n=document.getElementById('newAccName').value.trim();const b=parseFloat(document.getElementById('newAccBalance').value)||0;if(!n)return;DB.accounts.list.push({id:uid(),name:n,balance:b});saveKey('accounts');renderSettingsLists();document.getElementById('newAccName').value='';document.getElementById('newAccBalance').value='';updateStatusBar();}    
+function addEntity(){const n=document.getElementById('newEntName').value.trim();const t=document.getElementById('newEntType').value;if(!n)return;DB.entities.list.push({id:uid(),name:n,type:t,balance:0});saveKey('entities');renderSettingsLists();document.getElementById('newEntName').value='';updateStatusBar();}    
+function clearAllData(){if(!confirm('⚠️ همه داده‌ها پاک می‌شوند؟'))return;STORAGE_KEYS.forEach(k=>{localStorage.removeItem('gold_'+k);DB[k]=k==='config'?{password:null,users:[]}:k==='accounts'?{list:[]}:k==='entities'?{list:[]}:{}});DB.abshodeh={trades:[],invWeight:0,invAvgCost:0};DB.workshop={melts:[],expenses:[]};saveAll();alert('✅ پاک شد');location.reload();}    
+  
+// ===== ۱۳. MODAL =====    
+function openModal(h){document.getElementById('modalBox').innerHTML=h;document.getElementById('modalOverlay').classList.remove('hidden');updateBackButton();}    
+function closeModal(){document.getElementById('modalOverlay').classList.add('hidden');updateBackButton();}    
+  
+// ===== ۱۴. SUMMARY =====    
+function computeSnapshot(){const vo=DB.vitrine.ojratTrades.reduce((s,t)=>s+t.netProfit,0);const vp=DB.vitrine.priceTrades.filter(t=>t.direction==='sell').reduce((s,t)=>s+t.profit,0);const v=vo+vp;const ab=DB.abshodeh.trades.filter(t=>t.direction==='sell').reduce((s,t)=>s+t.totalAmount,0)-DB.abshodeh.trades.filter(t=>t.direction==='buy').reduce((s,t)=>s+t.totalAmount,0);const wk=DB.workshop.melts.reduce((s,t)=>s+t.price,0)*0.5;const tp=v+ab+wk;const tg=DB.vitrine.invWeight+DB.abshodeh.invWeight;const at=DB.accounts.list.reduce((s,a)=>s+a.balance,0);const wo=DB.entities.list.filter(e=>e.balance>0).reduce((s,e)=>s+e.balance,0);const to=DB.entities.list.filter(e=>e.balance<0).reduce((s,e)=>s-e.balance,0);const nc=at+to-wo;return{vitrineProfit:v,abshodehProfit:ab,workshopProfit:wk,totalProfit:tp,totalGoldWeight:tg,accountsTotal:at,weOweTotal:wo,theyOweUsTotal:to,netCash:nc,accounts:DB.accounts.list,entities:DB.entities.list};}    
+  
+function renderSummary(){const s=computeSnapshot();const el=document.getElementById('summaryScroll');const summaryEntityRow=e=>`<div class=entity-row><div class=entity-name>${e.name}</div><span class=record-amount ${e.balance>0?'neg':(e.balance<0?'pos':'')}>${e.balance===0?'✅ تسویه':(e.balance>0?'بدهکاریم '+fmt(e.balance):'طلب داریم '+fmt(-e.balance))}</span></div>`;const colleagues=s.entities.filter(e=>e.type==='colleague');const walkins=s.entities.filter(e=>e.type!=='colleague');let entitiesHtml='';if(!s.entities.length){entitiesHtml='<div class=empty-note>کسی ثبت نشده</div>';}else{entitiesHtml+='<div style=font-size:13px;font-weight:700;color:var(--gold);margin:4px 0 6px>🤝 همکاران ('+colleagues.length+')</div>';entitiesHtml+=colleagues.length?colleagues.map(summaryEntityRow).join(''):'<div class=empty-note>همکاری ثبت نشده</div>';entitiesHtml+='<div style=font-size:13px;font-weight:700;color:var(--gold);margin:14px 0 6px>👤 مشتریان ('+walkins.length+')</div>';entitiesHtml+=walkins.length?walkins.map(summaryEntityRow).join(''):'<div class=empty-note>مشتری ثبت نشده</div>';}const accountsHtml=s.accounts.map(a=>`<div class=breakdown-row><span>${a.name}</span><span class=${a.balance>=0?'pos':'neg'}>${fmt(a.balance)} ت</span></div>`).join('')||'<div class=empty-note>حسابی ثبت نشده</div>';let html=`  
+<div class=big-card style=border-color:var(--gold)><div class=big-card-title>💰 سود کل</div><div class=big-card-value ${s.totalProfit>=0?'pos':'neg'}>${fmt(s.totalProfit)} تومان</div><div class=sub-line>ویترین: ${fmt(s.vitrineProfit)} ت · آبشده: ${fmt(s.abshodehProfit)} ت · کارگاه: ${fmt(s.workshopProfit)} ت</div></div>  
+<div class=big-card style=border-color:var(--blue)><div class=big-card-title>🏦 نقدینگی</div><div class=big-card-value ${s.netCash>=0?'pos':'neg'}>${fmt(s.netCash)} تومان</div><div class=sub-line>حساب‌ها: ${fmt(s.accountsTotal)} ت · طلب: ${fmt(s.theyOweUsTotal)} ت · بدهی: ${fmt(s.weOweTotal)} ت</div></div>  
+<div class=big-card style=border-color:var(--gold-dark)><div class=big-card-title>🥇 موجودی طلا</div><div class=big-card-value>${fmtW(s.totalGoldWeight)} گرم</div></div>  
+<div class=big-card><div class=big-card-title>👤 اشخاص</div>${entitiesHtml}</div>  
+<div class=big-card><div class=big-card-title>🏧 حساب‌ها</div>${accountsHtml}</div>  
+<div style=background:var(--surface2);border-radius:14px;padding:16px;margin-top:10px;text-align:center><span style=color:var(--text-dim)>📅 امروز: ${todayStr()}</span></div>`;  
+el.innerHTML=html;}  
+  
+// ===== ۱۵. SAVE DAILY =====    
+function saveDailyData(){const today=todayStr();const data={date:today,user:currentUser?currentUser.name:'—',vitrine:{ojratTrades:DB.vitrine.ojratTrades.filter(t=>t.date===today),priceTrades:DB.vitrine.priceTrades.filter(t=>t.date===today)},abshodeh:{trades:DB.abshodeh.trades.filter(t=>t.date===today)},workshop:{melts:DB.workshop.melts.filter(t=>t.date===today)}};const json=JSON.stringify(data,null,2);if(isTelegramApp){copyTextToClipboard(json).then(ok=>{tgAlert(ok?'✅ اطلاعات روز '+today+' در کلیپ‌بورد کپی شد.':'❌ کپی ناموفق بود.');});return;}const blob=new Blob([json],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`daily_${today}.json`;a.click();URL.revokeObjectURL(url);alert('✅ اطلاعات روز '+today+' ذخیره شد');}    
+  
+// ===== ۱۶. EXPORT EXCEL (رفع خطا) =====    
+function exportToExcel(){    
+  if(isTelegramApp){    
+    tgAlert('📊 خروجی اکسل (فایل دانلودی) داخل تلگرام کار نمی‌کند. به‌جاش از «📋 کپی پشتیبان» استفاده کن، یا لینک اپ رو در مرورگر گوشی (کروم/سافاری) باز کن.');    
+    return;    
+  }    
+  try {    
+    if(typeof XLSX==='undefined'){    
+      alert('⏳ در حال بارگذاری کتابخانه اکسل... لطفاً به اینترنت متصل باشید.');    
+      const s=document.createElement('script');    
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';    
+      s.onload=function(){ alert('✅ بارگذاری شد! دوباره کلیک کنید.'); };    
+      s.onerror=function(){ alert('❌ خطا در بارگذاری. اتصال اینترنت را بررسی کنید.'); };    
+      document.head.appendChild(s);    
+      return;    
+    }    
+    generateExcel();    
+  } catch(e) {    
+    alert('❌ خطا در خروجی اکسل: ' + e.message + '\nلطفاً از دکمه اشتراک‌گذاری یا ذخیره پشتیبان استفاده کنید.');    
+  }    
+}    
+  
+function generateExcel(){    
+  try {    
+    if(typeof XLSX === 'undefined'){ alert('کتابخانه اکسل بارگذاری نشده'); return; }    
+    const wb=XLSX.utils.book_new();    
+    const s=computeSnapshot();    
+    const sd=[['📊 گزارش دستیار طلا'],['تاریخ:',todayStr()],['کاربر:',currentUser?.name||'—'],[''],['سود کل:',fmt(s.totalProfit)+' تومان'],['موجودی طلا:',s.totalGoldWeight+' گرم'],['نقدینگی:',fmt(s.netCash)+' تومان']];    
+    const ws1=XLSX.utils.aoa_to_sheet(sd); XLSX.utils.book_append_sheet(wb,ws1,'خلاصه');    
+    const od=[['تاریخ','زمان','کاربر','نوع','وزن','اجرت خرید','اجرت فروش','سود'],...DB.vitrine.ojratTrades.map(t=>[t.date,t.time,t.user,t.itemType,t.weight,t.buyOjrat,t.sellOjrat,t.netProfit])];    
+    const ws2=XLSX.utils.aoa_to_sheet(od); XLSX.utils.book_append_sheet(wb,ws2,'ویترین-اجرتی');    
+    const pd=[['تاریخ','زمان','کاربر','نوع','وزن','قیمت','سود'],...DB.vitrine.priceTrades.map(t=>[t.date,t.time,t.user,t.direction==='sell'?'فروش':'خرید',t.weight,t.price,t.profit||0])];    
+    const ws3=XLSX.utils.aoa_to_sheet(pd); XLSX.utils.book_append_sheet(wb,ws3,'ویترین-تابلو');    
+    const ad=[['تاریخ','زمان','کاربر','مشتری','جهت','وزن','عیار','وزن خالص','مبلغ کل','تسویه'],...DB.abshodeh.trades.map(t=>[t.date,t.time,t.user,t.customerName,t.direction==='sell'?'فروش':'خرید',t.weight,t.karat,t.netWeight,t.totalAmount,t.paid?'✅':'❌'])];    
+    const ws4=XLSX.utils.aoa_to_sheet(ad); XLSX.utils.book_append_sheet(wb,ws4,'آبشده');    
+    const wd=[['تاریخ','زمان','کاربر','مشتری','شماره پاکت','وزن','مبلغ','تسویه','سود'],...DB.workshop.melts.map(t=>[t.date,t.time,t.user,t.customerName,t.meltNumber,t.weight,t.price,t.paid?'✅':'❌',t.profit])];    
+    const ws5=XLSX.utils.aoa_to_sheet(wd); XLSX.utils.book_append_sheet(wb,ws5,'کارگاه');    
+    const ed=[['نام','نوع','مانده'],...DB.entities.list.map(e=>[e.name,e.type==='colleague'?'همکار':'مشتری',e.balance||0])];    
+    const ws6=XLSX.utils.aoa_to_sheet(ed); XLSX.utils.book_append_sheet(wb,ws6,'اشخاص');    
+    const fn='دستیار_طلا_'+todayStr()+'.xlsx';    
+    XLSX.writeFile(wb,fn);    
+    alert('✅ فایل '+fn+' ذخیره شد!');    
+  } catch(e) {    
+    alert('❌ خطا در ساخت فایل اکسل: ' + e.message);    
+  }    
+}    
+  
+// ===== ۱۷. SEND EMAIL =====    
+function sendBackupToEmail(){if(isTelegramApp){tgAlert('📧 ارسال ایمیل داخل تلگرام پشتیبانی نمی‌شود. از «📋 کپی پشتیبان» استفاده کن.');return;}const e=prompt('📧 ایمیل مقصد:','');if(!e||!e.includes('@')){alert('ایمیل معتبر وارد کنید');return;}if(typeof Email==='undefined'){alert('⏳ در حال بارگذاری...');const s=document.createElement('script');s.src='https://smtpjs.com/v3/smtp.js';s.onload=function(){sendEmail(e);};s.onerror=function(){alert('خطا در بارگذاری');};document.head.appendChild(s);return;}sendEmail(e);}    
+function sendEmail(email){try{const wb=XLSX.utils.book_new();const s=computeSnapshot();const sd=[['گزارش دستیار طلا'],['تاریخ:',todayStr()],['کاربر:',currentUser?.name||'—'],['سود کل:',fmt(s.totalProfit)+' تومان']];const ws=XLSX.utils.aoa_to_sheet(sd);XLSX.utils.book_append_sheet(wb,ws,'خلاصه');const xls=XLSX.write(wb,{bookType:'xlsx',type:'base64'});const backup={date:todayStr(),user:currentUser?.name||'Unknown',data:DB};const json=btoa(unescape(encodeURIComponent(JSON.stringify(backup,null,2))));Email.send({SecureToken:"YOUR_SECURE_TOKEN",To:email,From:"goldassistant@example.com",Subject:"📊 پشتیبان دستیار طلا - "+todayStr(),Body:"<h2>🪙 پشتیبان</h2><p>تاریخ: "+todayStr()+"</p><p>کاربر: "+currentUser?.name+"</p><p>سود کل: "+fmt(s.totalProfit)+" ت</p>",Attachments:[{name:"report_"+todayStr()+".xlsx",data:xls,type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},{name:"backup_"+todayStr()+".json",data:json,type:"application/json"}]}).then(()=>alert('✅ ایمیل ارسال شد!'),err=>alert('❌ خطا: '+err));}catch(e){alert('❌ خطا: '+e.message);}}    
+  
+// ===== ۱۸. STATUS =====    
+function updateStatusBar(){const total=DB.vitrine.ojratTrades.length+DB.vitrine.priceTrades.length+DB.abshodeh.trades.length+DB.workshop.melts.length;document.getElementById('dataCount').textContent=total+' رکورد';document.getElementById('statusText').textContent='✅ آفلاین - محلی';}    
+  
+// ===== ۱۹. INIT =====    
+initApp();    
+</script>    
+</body>    
+</html>  
